@@ -1,0 +1,10 @@
+# Core
+fastapi
+pydantic
+uvicorn
+sqlalchemy
+
+# Test and lint
+black
+flake8
+pytest
