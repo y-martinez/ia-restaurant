@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class OrderStatusValues(str, Enum):
     PENDING = "Pending"
     CANCELLED = "Cancelled"

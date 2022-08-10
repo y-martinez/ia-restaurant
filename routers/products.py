@@ -1,11 +1,11 @@
-
 from typing import List
 
 from schemas.product import Product as Product_schema
+from schemas.product import ProductCreate, ProductUpdate
 from database.connection import get_db, Base, engine
 from database.models import Product as Product_model
 
-from fastapi import APIRouter, Path, HTTPException
+from fastapi import APIRouter, Path, HTTPException, status
 from fastapi.params import Depends
 from sqlalchemy.orm import Session
 
@@ -13,23 +13,75 @@ router = APIRouter(tags=["product"])
 
 Base.metadata.create_all(engine)
 
+
 @router.get("/products", response_model=List[Product_schema])
-async def read_products(offset: int = 0, limit: int = 25, db: Session = Depends(get_db)):
+async def read_products(
+    offset: int = 0, limit: int = 25, db: Session = Depends(get_db)
+):
     products = db.query(Product_model).offset(offset).limit(limit).all()
     return products
 
-@router.post("/products", response_model=Product_schema)
-async def create_product(product: Product_schema, db: Session = Depends(get_db)):
+
+@router.post(
+    "/products", response_model=Product_schema, status_code=status.HTTP_201_CREATED
+)
+async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     params = product.dict()
+    product = db.query(Product_model).filter(Product_model.sku == params["sku"]).first()
+    if product is not None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="SKU already on inventory",
+        )
+
     new_product = Product_model(**params)
     db.add(new_product)
     db.commit()
     db.refresh(new_product)
     return new_product
 
+
 @router.get("/products/{id}", response_model=Product_schema)
-async def read_product(id : int = Path(gt = 0), db: Session = Depends(get_db)):
-    product = db.query(Product_model).filter(Product_model.id == id).first()
+async def read_product(id: int = Path(gt=0), db: Session = Depends(get_db)):
+    product = db.query(Product_model).get(id)
     if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        )
+    return product
+
+
+@router.delete("/products/{id}", status_code=status.HTTP_200_OK)
+async def delete_product(id: int = Path(gt=0), db: Session = Depends(get_db)):
+    product = db.query(Product_model).get(id)
+    if product is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        )
+
+    db.delete(product)
+    db.commit()
+    return {"detail": "Product deleted successfuly"}
+
+
+@router.put(
+    "/products/{id}", status_code=status.HTTP_200_OK, response_model=Product_schema
+)
+async def update_product(
+    product: ProductUpdate, id: int = Path(gt=0), db: Session = Depends(get_db)
+):
+    params = product.dict()
+    product = db.query(Product_model).get(id)
+    if product is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product not found"
+        )
+
+    product.name = params["name"] if params["name"] else product.name
+    product.price = params["price"] if params["price"] else product.price
+    product.stock = params["stock"] if params["stock"] else product.stock
+
+    db.commit()
+    db.refresh(product)
+
     return product
