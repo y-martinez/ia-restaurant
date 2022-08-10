@@ -9,11 +9,8 @@ app = FastAPI()
 app.include_router(orders_router, prefix="/api/v1")
 app.include_router(products_router, prefix="/api/v1")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins="*",
-    allow_methods="*"
-)
+app.add_middleware(CORSMiddleware, allow_origins="*", allow_methods="*")
+
 
 @app.get("/")
 async def root():
