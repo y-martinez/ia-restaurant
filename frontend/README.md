@@ -2,6 +2,8 @@
 
 This App made with ReactJS to manage products and orders.
 
+> Note: there are some issues with the frontend, also I need to finish it. I am very a newbie on ReactJS.
+
 ## Instructions
 
 To run the app:
