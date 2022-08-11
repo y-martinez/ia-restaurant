@@ -8,3 +8,4 @@ sqlalchemy
 black
 flake8
 pytest
+requests

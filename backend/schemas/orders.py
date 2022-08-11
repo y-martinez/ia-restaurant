@@ -50,6 +50,6 @@ class Order(OrderBase):
     class Config:
         orm_mode = True
 
+
 class OrderUpdate(OrderBase):
     order_status: OrderStatusValues
-    #updatedAt: datetime = Field(default=datetime.today())

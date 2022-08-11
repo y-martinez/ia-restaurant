@@ -56,13 +56,14 @@ async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
         else:
             product.stock -= cnt_products[product_id]
             db.add(product)
-    
+
     if len(out_stock) != 0:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"message": "Order not created, products out stock",
-                    "products": out_stock
-                    }
+            detail={
+                "message": "Order not created, products out stock",
+                "products": out_stock,
+            },
         )
 
     new_order = OrderModel(table=order.table, employee=order.employee)
@@ -95,6 +96,7 @@ async def read_order(id: int = Path(gt=0), db: Session = Depends(get_db)):
 
     return order
 
+
 @router.delete("/orders/{id}", status_code=status.HTTP_200_OK)
 async def delete_order(id: int = Path(gt=0), db: Session = Depends(get_db)):
     order = db.query(OrderModel).get(id)
@@ -108,8 +110,16 @@ async def delete_order(id: int = Path(gt=0), db: Session = Depends(get_db)):
     db.commit()
     return {"detail": "Product deleted successfuly"}
 
-@router.put("/orders/{id}", response_model=OrderSchema, response_model_by_alias=False, status_code=status.HTTP_200_OK)
-async def update_order(order: OrderUpdate,  id: int = Path(gt=0), db: Session = Depends(get_db)):
+
+@router.put(
+    "/orders/{id}",
+    response_model=OrderSchema,
+    response_model_by_alias=False,
+    status_code=status.HTTP_200_OK,
+)
+async def update_order(
+    order: OrderUpdate, id: int = Path(gt=0), db: Session = Depends(get_db)
+):
     params = order.dict()
     order = db.query(OrderModel).get(id)
 

@@ -11,7 +11,7 @@ from sqlalchemy import (
     Enum,
     DateTime,
 )
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -31,6 +31,7 @@ class Table(Base):
     __tablename__ = "tables"
 
     id = Column(Integer, primary_key=True, index=True)
+    seats = Column(Integer, nullable=False)
 
 
 class ProductOrdered(Base):
@@ -63,8 +64,12 @@ class Order(Base):
     @hybrid_property
     def total(self):
         if self.products:
-            return sum([ordered_products.product.price * ordered_products.quantityOrdered
-                        for ordered_products in self.products])
+            return sum(
+                [
+                    ordered_products.product.price * ordered_products.quantityOrdered
+                    for ordered_products in self.products
+                ]
+            )
         return 0
 
 
@@ -76,5 +81,3 @@ class Product(Base):
     sku = Column(String, unique=True, nullable=False)
     price = Column(Float, nullable=False)
     stock = Column(Integer, nullable=False)
-
-    ordered = relationship(ProductOrdered, cascade=("all,delete"))
