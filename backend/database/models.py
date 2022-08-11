@@ -63,8 +63,12 @@ class Order(Base):
     @hybrid_property
     def total(self):
         if self.products:
-            return sum([ordered_products.product.price * ordered_products.quantityOrdered
-                        for ordered_products in self.products])
+            return sum(
+                [
+                    ordered_products.product.price * ordered_products.quantityOrdered
+                    for ordered_products in self.products
+                ]
+            )
         return 0
 
 
