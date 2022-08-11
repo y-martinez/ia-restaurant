@@ -17,6 +17,9 @@ This API was developed using Python 3.6+ and the framework FastAPI.
 │   ├── __init__.py
 │   ├── orders.py
 │   └── products.py
+├── tests
+│   ├── __init__.py
+│   └── test_main.py
 └── schemas
     ├── __init__.py
     ├── employe.py
