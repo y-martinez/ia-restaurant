@@ -37,6 +37,46 @@ def test_main():
     assert response.json() == {"message": "Hello World"}
 
 
+def test_create_table():
+    good_data = {"seats": 5}
+    bad_data_missing = {}
+    bad_data_missing_not_number = {"seats": "f"}
+    bad_data_missing_not_positive = {"seats": -1}
+
+    response = client.post("api/v1/tables", json=good_data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data_commited = response.json()
+    assert good_data["seats"] == data_commited["seats"]
+
+    response = client.post("api/v1/tables", json=bad_data_missing)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    response = client.post("api/v1/tables", json=bad_data_missing_not_number)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    response = client.post("api/v1/tables", json=bad_data_missing_not_positive)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+def test_create_employee():
+    good_data = {"username": "employee1"}
+    bad_data_missing = {}
+    bad_data_missing_not_void = {"username": ""}
+
+    response = client.post("api/v1/employees", json=good_data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data_commited = response.json()
+    assert good_data["username"] == data_commited["username"]
+
+    response = client.post("api/v1/employees", json=bad_data_missing)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    response = client.post("api/v1/employees", json=bad_data_missing_not_void)
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
 def test_create_product():
 
     # POST
@@ -93,3 +133,20 @@ def test_read_all_products():
     response = client.get("api/v1/products", params={"limit": 1})
     assert response.status_code == status.HTTP_200_OK
     assert len(response.json()) == 1
+
+
+def test_create_order():
+    good_data = {"employee": 1, "table": 1, "products": [1, 1, 1, 1, 1]}
+
+    response = client.post("api/v1/orders", json=good_data)
+    assert response.status_code == status.HTTP_201_CREATED
+
+    data_commited = response.json()
+    assert good_data["employee"] == data_commited["employee"]
+    assert good_data["table"] == data_commited["table"]
+    assert data_commited["status"] == "PENDING"
+    assert data_commited["products"][0]["quantityOrdered"] == len(good_data["products"])
+
+    product_id = data_commited["products"][0]["id"]
+    response = client.get(f"api/v1/products/{product_id}")
+    assert response.json()["stock"] == 95

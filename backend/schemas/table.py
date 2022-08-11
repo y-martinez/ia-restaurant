@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class TableCreate(BaseModel):
-    pass
+    seats: int = Field(ge=1)
 
 
 class Table(TableCreate):
