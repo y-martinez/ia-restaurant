@@ -6,14 +6,11 @@ import OrdersList from '../components/OrdersList';
 
 
 class Orders extends React.Component {
-    constructor(props) {
-        super(props);
-        this.api = new OrdersClient();
-        this.state = {
-            loading: true, 
-        };
-    }    
-
+    api = new OrdersClient();
+    state = {
+        loading: true, 
+    };
+        
     async fetchData() {
         this.setState({loading: true});
         let response = await this.api.getAll();

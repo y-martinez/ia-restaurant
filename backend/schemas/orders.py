@@ -42,7 +42,7 @@ class Order(OrderBase):
     status: OrderStatusValues
     employee: int = Field(ge=1)
     table: int = Field(ge=1)
-    total: float = Field(gt=0)
+    total: float
     createdAt: datetime = Field(default=datetime.today())
     updatedAt: datetime = Field(default=datetime.today())
     products: List[ProductOrdered]
